@@ -207,51 +207,69 @@ export default function Viewer() {
   };
 
   // -----------------------------
-  // Save: legacy download (old behavior)
+  // Download
   // -----------------------------
   const doDownload = () => {
     if (!data || data.length === 0) return;
-    const defaultFileName = window.prompt("Enter filename to save CSV:", fileName || "data.csv");
+
+    const defaultFileName = window.prompt(
+      "Enter filename to save CSV:",
+      fileName || "data.csv"
+    );
     if (!defaultFileName) return;
+
     const csvString = Papa.unparse(data);
     const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const href = URL.createObjectURL(blob);
+
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
+    link.href = href;
     link.setAttribute("download", defaultFileName);
     document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
+    setTimeout(() => {
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(href);
+    }, 0);
   };
 
+
+
   // -----------------------------
-  // Save: native File System Access API (overwrites if same file)
+  // Save/SaveAs
   // -----------------------------
   const saveCsv = async () => {
     if (!data || data.length === 0) return;
+
+    if (!window.showSaveFilePicker) {
+      alert("Your browser doesn't support Save As.\nA download will be triggered instead.");
+      return doDownload();
+    }
+
     try {
-      let handle = window.csvHandle;
-      if (!handle) {
-        // show save file picker (Chrome/Edge/Opera).
-        handle = await window.showSaveFilePicker({
-          suggestedName: fileName || "data.csv",
-          types: [
-            {
-              description: "CSV Files",
-              accept: { "text/csv": [".csv"] },
-            },
-          ],
-        });
-        window.csvHandle = handle;
-      }
+      const handle = await window.showSaveFilePicker({
+        suggestedName: fileName || "data.csv",
+        types: [
+          {
+            description: "CSV File",
+            accept: { "text/csv": [".csv"] }
+          }
+        ]
+      });
+
       const writable = await handle.createWritable();
       const csvString = Papa.unparse(data);
       await writable.write(csvString);
       await writable.close();
     } catch (err) {
-      // user cancelled or API not supported
-      console.error("Save error:", err);
+      if (err?.name === "AbortError") return;
+      console.error("Save failed:", err);
+      alert("Error saving file.\nA download will be triggered instead.");
+      doDownload();
     }
   };
+
 
   // -----------------------------
   // helpers to open/close menus (passed to table rendering)
