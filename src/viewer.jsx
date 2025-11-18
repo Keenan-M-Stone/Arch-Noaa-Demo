@@ -295,6 +295,7 @@ export default function Viewer() {
   // expose the props expected by table_helpers.renderEditor
   const props = {
     // data + flags
+    fileName,
     data,
     loaded,
     // actions

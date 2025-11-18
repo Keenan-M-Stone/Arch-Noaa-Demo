@@ -119,7 +119,16 @@ const renderTableRows = (params) => {
 // Render Table Wrapper
 // -----------------------------------
 export const renderTable = (params) => (
-  <div style={{ overflowX: "auto" }}>
+  <div 
+    // Scroll bars
+    style={{
+      width: "100%",
+      height: "100%",
+      overflow: "auto",
+      whiteSpace: "nowrap",
+      border: "1px solid #ccc",
+    }}
+  >
     <table style={{ borderCollapse: "collapse", width: "100%" }}>
       <tbody>{renderTableRows(params)}</tbody>
     </table>
@@ -131,6 +140,7 @@ export const renderTable = (params) => (
 // -----------------------------------
 export const renderEditor = (params) => {
   const {
+    fileName,
     data,
     loaded,
     handleFileUpload,
@@ -285,7 +295,21 @@ export const renderEditor = (params) => {
             Insert Column Right
           </div>
         </div>
-      )}
+      )},
+      <div
+        style={{
+          marginTop: "8px",
+          padding: "6px 10px",
+          borderTop: "1px solid #ccc",
+          background: "#f8f8f8",
+          fontSize: "0.9rem",
+          color: "#333",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <span>File: {fileName || "No file loaded"}</span>
+      </div>
     </div>
   );
 };
